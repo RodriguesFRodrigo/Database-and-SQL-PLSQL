@@ -18,6 +18,9 @@ select json_object(
     format json
 ) from dual;
 
+-- Json de uma tabela.
+select json_object(codigo, nome) from hsusuarios;
+
 -- Criando jsons de uma tabela.
 select json_object(key 'nome' value nome_banco) 
 from hsusuarios;
@@ -38,3 +41,60 @@ select json_array(
      {"name": "Wanderson"}'
      format json
 ) from dual;
+
+-- JSON_TABLE --
+-- Permite criar view de json e array.
+
+-- Consultando um json.
+-- {a:1, b:2, c:3} json para consultar.
+-- columns(a, b, c) chaves do json acessadas.
+select *
+from json_table('{a:1, b:2, c:3}', 
+                '$' columns(a, b, c));
+
+-- Consultando um array de json.
+select *
+from json_table(
+    '[{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}]', 
+    '$[*]' 
+    columns(a, b, c)
+    );
+
+-- Consultando um array de json.
+select a, b, c
+from json_table('[{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}]', 
+                '$[*]' 
+                columns (
+                    a varchar2(20) path '$.a',
+                    b number path '$.b',
+                    c number path '$.c'
+));
+
+-- Especificando as colunas de saída.
+select 
+  a as "coluna_a", 
+  b as "coluna_b"
+from json_table(
+    '[{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}]', 
+    '$[*]' 
+    columns(a, b, c)
+    );
+
+-- Filtrando linhas especificas.
+select 
+  a as "coluna_a", 
+  b as "coluna_b"
+from json_table(
+    '[{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}]', 
+    '$[*]' 
+    columns(a, b, c)
+    )
+where a / 2 = 0
+
+-- Extraindo valores de um array simples.
+select value 
+from json_table('[1, 2, 3, 4, 5, 6, 7, 8, 9]', 
+                '$[*]' 
+                columns (value number path '$[*]'))
+
+            
